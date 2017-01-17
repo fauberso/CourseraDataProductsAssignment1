@@ -1,0 +1,31 @@
+---
+title: "Picnic Areas in Zurich"
+author: "Frederic Auberson"
+date: "17 Januar 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("leaflet")
+library(leaflet)
+
+#install.packages("jsonlite")
+library(jsonlite)
+```
+
+## Generating a leaflet map in R using GeoJSON data
+
+The city of Zurich publishes a list of all picnic areas in the City of Zurich as a GeoJSON file. This simple example will parse this file, then generate a map:
+
+```{r picnicmap, fig.width=9, fig.height=9, fig.align='center'}
+download.file("https://data.stadt-zuerich.ch/dataset/picknickplatz/resource/b533a584-6cd8-460c-8c3f-5b71cd0207ca/download/picknickplatz.json", "picnic.json")
+picnic <- fromJSON("picnic.json")[[3]]
+
+coords <- do.call(rbind, picnic$geometry$coordinates)
+popup <- paste("<strong>", picnic$properties$Name, "</strong><br>", picnic$properties$Kontakt, "<br>", picnic$properties$Infrastruktur, "<br>", picnic$properties$Anlageelemente)
+icon <- makeIcon("picnic_area.png", iconWidth = 24, iconHeight = 24)
+
+leaflet() %>% addTiles() %>% addMarkers(data = coords, icon = icon, popup = popup)
+```
